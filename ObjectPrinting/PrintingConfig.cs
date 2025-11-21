@@ -24,7 +24,7 @@ namespace ObjectPrinting
 
         private readonly Dictionary<PropertyInfo, int> propertyMaxLengths = new();
 
-        private CultureInfo Culture = CultureInfo.CurrentCulture;
+        private CultureInfo culture = CultureInfo.CurrentCulture;
 
         public string PrintToString(TOwner obj)
         {
@@ -47,7 +47,7 @@ namespace ObjectPrinting
 
         public PrintingConfig<TOwner> SetCulture(CultureInfo culture)
         {
-            Culture = culture;
+            this.culture = culture;
             return this;
         }
 
@@ -102,7 +102,7 @@ namespace ObjectPrinting
 
         private string PrintToString(object obj, int nestingLevel)
         {
-            //TODO apply configurations
+            CultureInfo.CurrentCulture = culture;
             if (obj == null)
                 return "null" + Environment.NewLine;
 
