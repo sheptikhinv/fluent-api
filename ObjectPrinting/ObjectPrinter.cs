@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -27,7 +28,31 @@ public class ObjectPrinter
         return PrintToString(obj, 0);
     }
 
-    private string? TryFinishProperty(object obj)
+    private string? ProcessCollection(IEnumerable collection, int nestingLevel)
+    {
+        var tabsCount = new string('\t', nestingLevel + 1);
+        var index = 0;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("[");
+        foreach (var value in collection)
+        {
+            var result = PrintToString(value, nestingLevel + 1);
+            sb.Append($"{tabsCount}[{index}] = {result}");
+            index++;
+        }
+
+        sb.Append(new string('\t', nestingLevel) + ']');
+
+        return sb.ToString();
+    }
+
+    private string ProcessDictionary()
+    {
+        throw new NotImplementedException();
+    }
+
+    private string? TryFinishProperty(object obj, int nestingLevel)
     {
         if (obj == null)
         {
@@ -42,6 +67,16 @@ public class ObjectPrinter
         if (obj.GetType().IsSimple())
         {
             return obj + Environment.NewLine;
+        }
+
+        if (obj is IEnumerable enumerable)
+        {
+            return ProcessCollection(enumerable, nestingLevel);
+        }
+
+        if (obj is IDictionary)
+        {
+            return ProcessDictionary();
         }
 
         return null;
@@ -62,7 +97,7 @@ public class ObjectPrinter
     {
         CultureInfo.CurrentCulture = config.Culture;
 
-        var possibleResult = TryFinishProperty(obj);
+        var possibleResult = TryFinishProperty(obj, nestingLevel);
         if (possibleResult != null) return possibleResult;
 
         processed.Add(obj);

@@ -10,7 +10,7 @@ public class ObjectPrinterAcceptanceTests
     [Test]
     public void Demo()
     {
-        var person = new Person { Name = "Alex", Age = 19 };
+        var person = new Person { Name = "Alex", Age = 19, Tags = ["tag1", "tag2"] };
 
         var printer = ObjectPrinter.For<Person>()
             .Exclude<Guid>()

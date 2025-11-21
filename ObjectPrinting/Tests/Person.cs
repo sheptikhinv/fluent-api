@@ -11,5 +11,6 @@ namespace ObjectPrinting.Tests
         public DateTime LastTimeOnline { get; set; }
         public Person Father { get; set; }
         public Person Child { get; set; }
+        public string[] Tags { get; set; }
     }
 }
