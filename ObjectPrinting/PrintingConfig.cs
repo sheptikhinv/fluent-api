@@ -26,6 +26,8 @@ namespace ObjectPrinting
 
         private CultureInfo culture = CultureInfo.CurrentCulture;
 
+        private readonly HashSet<object> processed = [];
+
         public string PrintToString(TOwner obj)
         {
             return PrintToString(obj, 0);
@@ -106,8 +108,13 @@ namespace ObjectPrinting
             if (obj == null)
                 return "null" + Environment.NewLine;
 
+            if (processed.Contains(obj))
+                return "cyclic reference" + Environment.NewLine;
+
             if (finalTypes.Contains(obj.GetType()))
                 return obj + Environment.NewLine;
+
+            processed.Add(obj);
 
             var identation = new string('\t', nestingLevel + 1);
             var sb = new StringBuilder();
