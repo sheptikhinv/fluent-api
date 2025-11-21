@@ -92,6 +92,11 @@ namespace ObjectPrinting
                 return typeSerializers[propertyInfo.PropertyType](obj);
             }
 
+            if (propertyMaxLengths.ContainsKey(propertyInfo))
+            {
+                return propertyInfo.GetValue(obj).ToString()[..propertyMaxLengths[propertyInfo]] + Environment.NewLine;
+            }
+
             return PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1);
         }
 
