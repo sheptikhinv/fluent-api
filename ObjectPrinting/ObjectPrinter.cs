@@ -28,7 +28,7 @@ public class ObjectPrinter
         return PrintToString(obj, 0);
     }
 
-    private string? ProcessCollection(IEnumerable collection, int nestingLevel)
+    private string? ProcessCollection(ICollection collection, int nestingLevel)
     {
         var tabsCount = new string('\t', nestingLevel + 1);
         var index = 0;
@@ -47,9 +47,21 @@ public class ObjectPrinter
         return sb.ToString();
     }
 
-    private string ProcessDictionary()
+    private string ProcessDictionary(IDictionary dictionary, int nestingLevel)
     {
-        throw new NotImplementedException();
+        var tabsCount = new string('\t', nestingLevel + 1);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("{");
+        foreach (DictionaryEntry entry in dictionary)
+        {
+            var key = entry.Key;
+            var value = entry.Value;
+            sb.Append($"{tabsCount}{key} = {PrintToString(value, nestingLevel + 1)}");
+        }
+
+        sb.Append(new string('\t', nestingLevel) + '}');
+        return sb.ToString();
     }
 
     private string? TryFinishProperty(object obj, int nestingLevel)
@@ -69,14 +81,14 @@ public class ObjectPrinter
             return obj + Environment.NewLine;
         }
 
-        if (obj is IEnumerable enumerable)
+        if (obj is IDictionary dictionary)
         {
-            return ProcessCollection(enumerable, nestingLevel);
+            return ProcessDictionary(dictionary, nestingLevel) + Environment.NewLine;
         }
 
-        if (obj is IDictionary)
+        if (obj is ICollection collection)
         {
-            return ProcessDictionary();
+            return ProcessCollection(collection, nestingLevel) + Environment.NewLine;
         }
 
         return null;

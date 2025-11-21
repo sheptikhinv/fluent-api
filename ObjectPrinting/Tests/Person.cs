@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ObjectPrinting.Tests
 {
@@ -12,5 +13,6 @@ namespace ObjectPrinting.Tests
         public Person Father { get; set; }
         public Person Child { get; set; }
         public string[] Tags { get; set; }
+        public Dictionary<string, string> CustomProperties { get; set; }
     }
 }

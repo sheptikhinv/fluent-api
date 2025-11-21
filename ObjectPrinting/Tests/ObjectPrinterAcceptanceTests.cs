@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using NUnit.Framework;
 
@@ -10,7 +11,13 @@ public class ObjectPrinterAcceptanceTests
     [Test]
     public void Demo()
     {
-        var person = new Person { Name = "Alex", Age = 19, Tags = ["tag1", "tag2"] };
+        var person = new Person
+        {
+            Name = "Alex",
+            Age = 19,
+            Tags = ["tag1", "tag2"],
+            CustomProperties = new Dictionary<string, string> { { "key1", "value1" }, { "key2", "value2" } },
+        };
 
         var printer = ObjectPrinter.For<Person>()
             .Exclude<Guid>()
