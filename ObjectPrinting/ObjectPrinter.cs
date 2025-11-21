@@ -68,27 +68,27 @@ public class ObjectPrinter
     {
         if (obj == null)
         {
-            return "null" + Environment.NewLine;
+            return "null";
         }
 
         if (processed.Contains(obj))
         {
-            return "cyclic reference" + Environment.NewLine;
+            return "cyclic reference";
         }
 
         if (obj.GetType().IsSimple())
         {
-            return obj + Environment.NewLine;
+            return obj.ToString();
         }
 
         if (obj is IDictionary dictionary)
         {
-            return ProcessDictionary(dictionary, nestingLevel) + Environment.NewLine;
+            return ProcessDictionary(dictionary, nestingLevel);
         }
 
         if (obj is ICollection collection)
         {
-            return ProcessCollection(collection, nestingLevel) + Environment.NewLine;
+            return ProcessCollection(collection, nestingLevel);
         }
 
         return null;
@@ -110,7 +110,7 @@ public class ObjectPrinter
         CultureInfo.CurrentCulture = config.Culture;
 
         var possibleResult = TryFinishProperty(obj, nestingLevel);
-        if (possibleResult != null) return possibleResult;
+        if (possibleResult != null) return possibleResult + Environment.NewLine;
 
         processed.Add(obj);
 
