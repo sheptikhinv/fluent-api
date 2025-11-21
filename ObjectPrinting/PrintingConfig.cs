@@ -33,7 +33,7 @@ namespace ObjectPrinting
 
         public PrintingConfig<TOwner> Exclude<TProperty>(Expression<Func<TOwner, TProperty>> expression)
         {
-            var property = expression as MemberExpression;
+            var property = expression.Body as MemberExpression;
             var propertyInfo = property?.Member as PropertyInfo;
             excludedProperties.Add(propertyInfo);
             return this;
