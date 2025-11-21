@@ -10,13 +10,19 @@ namespace ObjectPrinting
 {
     public class PrintingConfig<TOwner>
     {
-        private List<Type> excludedTypes = [];
-        private List<PropertyInfo> excludedProperties = [];
+        private readonly Type[] finalTypes =
+        [
+            typeof(int), typeof(double), typeof(float), typeof(string),
+            typeof(DateTime), typeof(TimeSpan), typeof(Guid)
+        ];
 
-        private Dictionary<Type, Func<IReflect, string>> typeSerializers = new();
-        private Dictionary<PropertyInfo, Func<IReflect, string>> propertySerializers = new();
+        private readonly List<Type> excludedTypes = [];
+        private readonly List<PropertyInfo> excludedProperties = [];
 
-        private Dictionary<PropertyInfo, int> propertyMaxLengths = new();
+        private readonly Dictionary<Type, Func<object, string>> typeSerializers = new();
+        private readonly Dictionary<PropertyInfo, Func<object, string>> propertySerializers = new();
+
+        private readonly Dictionary<PropertyInfo, int> propertyMaxLengths = new();
 
         private CultureInfo Culture = CultureInfo.CurrentCulture;
 
@@ -45,14 +51,14 @@ namespace ObjectPrinting
             return this;
         }
 
-        public PrintingConfig<TOwner> AddSerializer<T>(Func<IReflect, string> serializer)
+        public PrintingConfig<TOwner> AddSerializer<T>(Func<object, string> serializer)
         {
             typeSerializers.Add(typeof(T), serializer);
             return this;
         }
 
         public PrintingConfig<TOwner> AddSerializer<TProperty>(Expression<Func<TOwner, TProperty>> expression,
-            Func<IReflect, string> serializer)
+            Func<object, string> serializer)
         {
             var property = expression.Body as MemberExpression;
             var propertyInfo = property?.Member as PropertyInfo;
@@ -68,17 +74,33 @@ namespace ObjectPrinting
             return this;
         }
 
+        private string? ProcessProperty(PropertyInfo propertyInfo, object obj, int nestingLevel)
+        {
+            if (excludedTypes.Contains(propertyInfo.PropertyType) ||
+                excludedProperties.Contains(propertyInfo))
+            {
+                return null;
+            }
+
+            if (propertySerializers.ContainsKey(propertyInfo))
+            {
+                return propertySerializers[propertyInfo](obj);
+            }
+
+            if (typeSerializers.ContainsKey(propertyInfo.PropertyType))
+            {
+                return typeSerializers[propertyInfo.PropertyType](obj);
+            }
+
+            return PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1);
+        }
+
         private string PrintToString(object obj, int nestingLevel)
         {
             //TODO apply configurations
             if (obj == null)
                 return "null" + Environment.NewLine;
 
-            var finalTypes = new[]
-            {
-                typeof(int), typeof(double), typeof(float), typeof(string),
-                typeof(DateTime), typeof(TimeSpan), typeof(Guid)
-            };
             if (finalTypes.Contains(obj.GetType()))
                 return obj + Environment.NewLine;
 
@@ -88,12 +110,9 @@ namespace ObjectPrinting
             sb.AppendLine(type.Name);
             foreach (var propertyInfo in type.GetProperties())
             {
-                if (excludedTypes.Contains(propertyInfo.PropertyType) ||
-                    excludedProperties.Contains(propertyInfo))
-                    continue;
-                sb.Append(identation + propertyInfo.Name + " = " +
-                          PrintToString(propertyInfo.GetValue(obj),
-                              nestingLevel + 1));
+                var propertyResult = ProcessProperty(propertyInfo, obj, nestingLevel);
+                if (propertyResult is null) continue;
+                sb.Append(identation + propertyInfo.Name + " = " + propertyResult);
             }
 
             return sb.ToString();
