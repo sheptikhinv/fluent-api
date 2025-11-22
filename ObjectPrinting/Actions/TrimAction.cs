@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 
 namespace ObjectPrinting.Actions;
@@ -9,6 +10,8 @@ public class TrimAction : IAction
 
     public TrimAction(PropertyInfo propertyToTrim, int maxLength)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxLength);
+
         this.propertyToTrim = propertyToTrim;
         this.maxLength = maxLength;
     }
