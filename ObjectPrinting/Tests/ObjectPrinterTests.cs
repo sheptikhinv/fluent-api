@@ -9,8 +9,15 @@ namespace ObjectPrinting.Tests;
 [TestFixture]
 public class ObjectPrinterTests
 {
-    private static string GetExpectedFilePath() =>
-        $"{TestContext.CurrentContext.TestDirectory}/../../../Expected/{TestContext.CurrentContext.Test.MethodName}.txt";
+    private static string GetExpectedFilePath()
+    {
+        var testDirectory = TestContext.CurrentContext.TestDirectory;
+        var projectDirectory = Directory.GetParent(testDirectory)?.Parent?.Parent?.FullName;
+
+        var expectedDirectory = Path.Combine(projectDirectory, "Expected");
+        var fileName = $"{TestContext.CurrentContext.Test.MethodName}.txt";
+        return Path.Combine(expectedDirectory, fileName);
+    }
 
     private static string GetExpectedResult() => File.ReadAllText(GetExpectedFilePath());
 
@@ -221,7 +228,7 @@ public class ObjectPrinterTests
         var printer = ObjectPrinter.For<Person>()
             .SpecifyCulture(p => p.Height, CultureInfo.GetCultureInfo("en-US"))
             .Build();
-        
+
         var actual = printer.PrintToString(person);
 
         AssertExpectedResult(actual);
