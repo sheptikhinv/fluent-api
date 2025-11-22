@@ -107,8 +107,6 @@ public class ObjectPrinter
 
     private string PrintToString(object obj, int nestingLevel)
     {
-        CultureInfo.CurrentCulture = config.Culture;
-
         var possibleResult = TryFinishProperty(obj, nestingLevel);
         if (possibleResult != null) return possibleResult + Environment.NewLine;
 

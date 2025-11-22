@@ -7,7 +7,6 @@ namespace ObjectPrinting;
 public class PrintingConfig
 {
     private readonly List<IAction> actions;
-    public CultureInfo Culture = CultureInfo.CurrentCulture;
 
     public PrintingConfig()
     {

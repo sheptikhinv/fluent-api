@@ -32,9 +32,19 @@ public class PrintingConfigurator<TOwner>
         return this;
     }
 
-    public PrintingConfigurator<TOwner> SetCulture(CultureInfo newCulture)
+    public PrintingConfigurator<TOwner> SpecifyCulture<T>(CultureInfo newCulture) where T : IFormattable
     {
-        config.Culture = newCulture;
+        var action = new SpecifyCultureAction(typeof(T), newCulture);
+        config.AddAction(action);
+        return this;
+    }
+
+    public PrintingConfigurator<TOwner> SpecifyCulture<TProperty>(Expression<Func<TOwner, TProperty>> expression,
+        CultureInfo cultureInfo)
+    {
+        var propertyInfo = GetPropertyInfo(expression);
+        var action = new SpecifyCultureAction(propertyInfo, cultureInfo);
+        config.AddAction(action);
         return this;
     }
 
