@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using NUnit.Framework;
 
@@ -8,36 +9,31 @@ namespace ObjectPrinting.Tests;
 [TestFixture]
 public class ObjectPrinterTests
 {
-    private const bool GenerateExpectedResult = false;
-
     private static string GetExpectedFilePath() =>
         $"{TestContext.CurrentContext.TestDirectory}/../../../Expected/{TestContext.CurrentContext.Test.MethodName}.txt";
 
     private static string GetExpectedResult() => File.ReadAllText(GetExpectedFilePath());
 
-    private void AssertOrGenerateExpectedResult(string actual)
+    private void AssertExpectedResult(string actual)
+    {
+        var expected = GetExpectedResult();
+
+        TestContext.WriteLine("Expected: ");
+        TestContext.WriteLine(expected);
+        TestContext.WriteLine("Actual: ");
+        TestContext.WriteLine(actual);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    private void GenerateExpectedFile(string expected)
     {
         var filePath = GetExpectedFilePath();
-
-        if (GenerateExpectedResult)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            File.WriteAllText(filePath, actual);
-            Assert.Inconclusive($"Generated expected result: {filePath}");
-        }
-
-        else
-        {
-            var expected = GetExpectedResult();
-
-            TestContext.WriteLine("Expected: ");
-            TestContext.WriteLine(expected);
-            TestContext.WriteLine("Actual: ");
-            TestContext.WriteLine(actual);
-
-            Assert.That(actual, Is.EqualTo(expected));
-        }
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+        File.WriteAllText(filePath, expected);
+        Assert.Inconclusive($"Generated expected result: {filePath}");
     }
+
 
     [Test]
     public void ObjectPrinter_ExcludeType()
@@ -54,7 +50,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -72,7 +68,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -92,7 +88,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -110,7 +106,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -129,7 +125,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -153,7 +149,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -171,7 +167,7 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
     }
 
     [Test]
@@ -190,6 +186,44 @@ public class ObjectPrinterTests
 
         var actual = printer.PrintToString(person);
 
-        AssertOrGenerateExpectedResult(actual);
+        AssertExpectedResult(actual);
+    }
+
+    [Test]
+    public void ObjectPrinter_SpecifyTypeCulture()
+    {
+        var person = new Person
+        {
+            Name = "Alex",
+            Age = 19,
+            LastTimeOnline = new DateTime(2021, 1, 1, 12, 0, 0)
+        };
+
+        var printer = ObjectPrinter.For<Person>()
+            .SpecifyCulture<DateTime>(CultureInfo.GetCultureInfo("en-US"))
+            .Build();
+
+        var actual = printer.PrintToString(person);
+
+        AssertExpectedResult(actual);
+    }
+
+    [Test]
+    public void ObjectPrinter_SpecifyPropertyCulture()
+    {
+        var person = new Person
+        {
+            Name = "Alex",
+            Age = 19,
+            Height = 185.12
+        };
+
+        var printer = ObjectPrinter.For<Person>()
+            .SpecifyCulture(p => p.Height, CultureInfo.GetCultureInfo("en-US"))
+            .Build();
+        
+        var actual = printer.PrintToString(person);
+
+        AssertExpectedResult(actual);
     }
 }
